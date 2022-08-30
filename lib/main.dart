@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shop/providers/auth.dart';
 import 'package:shop/providers/card_item.dart';
+import 'package:shop/providers/category_prod.dart';
 import 'package:shop/providers/order.dart';
 import 'package:shop/providers/provider_prod.dart';
+import 'package:shop/providers/review_provider.dart';
 import 'package:shop/screens/auth_screen.dart';
 import 'package:shop/screens/cart.dart';
 import 'package:shop/screens/edit_product_screen.dart';
@@ -25,14 +27,29 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => Auth()),
-        ChangeNotifierProxyProvider<Auth, ProviderProd>(
-          create: (context) => ProviderProd(),
+        ChangeNotifierProxyProvider<Auth, ProviderProd>(// when any of the obj changes (auth or providerprod) and notifylistner is called
+          create: (context) => ProviderProd(),          //then update mehtod is called and token is updated
           update: (_, auth, provider) =>
               provider!..updateToken(auth.token, auth.userId),
         ),
         ChangeNotifierProvider(create: (context) => Cart()),
+        ChangeNotifierProxyProvider<Auth, Cart>(
+          create: (context) => Cart(),
+          update: (_, auth, provider) =>
+              provider!..updateToken(auth.token, auth.userId),
+        ),
         ChangeNotifierProxyProvider<Auth, Order>(
           create: (context) => Order(),
+          update: (_, auth, provider) =>
+              provider!..updateToken(auth.token, auth.userId),
+        ),
+        ChangeNotifierProxyProvider<Auth, CategoryProd>(
+          create: (context) => CategoryProd(),
+          update: (_, auth, provider) =>
+              provider!..updateToken(auth.token, auth.userId),
+        ),
+        ChangeNotifierProxyProvider<Auth, ReviewProvider>(
+          create: (context) => ReviewProvider(),
           update: (_, auth, provider) =>
               provider!..updateToken(auth.token, auth.userId),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop/providers/category_prod.dart';
 import 'package:shop/providers/provider_prod.dart';
 import 'package:shop/screens/edit_product_screen.dart';
 import 'package:shop/widgit/app_drawer.dart';
@@ -36,7 +37,7 @@ class UserProductScreen extends StatelessWidget {
             : RefreshIndicator(
                 onRefresh: () => onRefresh(context),
                 child: Consumer<ProviderProd>(
-                  builder:(ctx,list,_)=> Padding(
+                  builder: (ctx, list, _) => Padding(
                     padding: const EdgeInsets.all(4),
                     child: ListView.builder(
                       itemBuilder: (context, i) {
@@ -68,9 +69,9 @@ class UserProductScreen extends StatelessWidget {
                                     ),
                                     IconButton(
                                       onPressed: () async {
-                                        await list
-                                            .deleteProd(list.items[i].id)
-                                            .catchError((error) {
+                                        String id = list.items[i].id;
+                                        await list.deleteProd(id).catchError(
+                                            (error) {
                                           scaffold.showSnackBar(
                                             const SnackBar(
                                               content: Text(
@@ -79,7 +80,10 @@ class UserProductScreen extends StatelessWidget {
                                               ),
                                             ),
                                           );
-                                        });
+                                        }).then((value) =>
+                                            Provider.of<CategoryProd>(context,
+                                                    listen: false)
+                                                .removeElement(id));
                                       },
                                       icon: const Icon(
                                         Icons.delete,

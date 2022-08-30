@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shop/models/product.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/provider_prod.dart';
+import 'package:shop/screens/user_product_screen.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit_product_screen';
@@ -15,6 +16,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final focusDesc = FocusNode();
   final focusPrice = FocusNode();
   final focusImage = FocusNode();
+  final focusCateg = FocusNode();
   final _imageController = TextEditingController();
   final key = GlobalKey<FormState>();
   var showLoading = false;
@@ -24,6 +26,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     desc: 'desc',
     price: 0,
     imageUrl: 'imageUrl',
+    categ: 'Men',
   );
   var initialVal = {
     'id': '',
@@ -31,14 +34,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
     'desc': ' ',
     'price': 0,
     'imageUrl': 'imageUrl',
+    'category': 'Men',
   };
   bool isTrue = true;
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     if (isTrue) {
       final id = ModalRoute.of(context)?.settings.arguments as String;
-      if (id.length!=2) {
+      if (id.length != 2) {
         newProduct =
             Provider.of<ProviderProd>(context, listen: false).findId(id);
         initialVal = {
@@ -47,6 +50,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           'desc': newProduct.desc,
           'price': newProduct.price,
           'imageUrl': newProduct.imageUrl,
+          'category': 'Men',
         };
         _imageController.text = newProduct.imageUrl;
       }
@@ -61,6 +65,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     focusDesc.dispose();
     focusPrice.dispose();
     focusImage.dispose();
+    focusCateg.dispose();
     _imageController.dispose();
     super.dispose();
   }
@@ -88,13 +93,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
     });
     key.currentState?.save();
     if (newProduct.id != '') {
-      await Provider.of<ProviderProd>(context, listen: false).update(newProduct);
-      // print('hi');
-      // print(newProduct.desc);
+      await Provider.of<ProviderProd>(context, listen: false)
+          .update(newProduct);
       setState(() {
         showLoading = false;
       });
-      Navigator.of(context).pop();
+      //Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, UserProductScreen.routeName);
       return;
     }
     try {
@@ -161,7 +166,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     ),
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (val) {
-                      FocusScope.of(context).requestFocus(focusPrice);
+                      FocusScope.of(context).requestFocus(focusCateg);
                     },
                     onSaved: (newValue) {
                       newProduct = Product(
@@ -171,11 +176,46 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         price: newProduct.price,
                         imageUrl: newProduct.imageUrl,
                         isFav: newProduct.isFav,
+                        categ: newProduct.categ,
                       );
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please Enter a Valid Title';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: initialVal['category'].toString(),
+                    focusNode: focusCateg,
+                    decoration: const InputDecoration(
+                      label: Text('Category'),
+                    ),
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (val) {
+                      FocusScope.of(context).requestFocus(focusPrice);
+                    },
+                    onSaved: (newValue) {
+                      newProduct = Product(
+                        id: newProduct.id,
+                        title: newProduct.title,
+                        desc: newProduct.desc,
+                        price: newProduct.price,
+                        imageUrl: newProduct.imageUrl,
+                        isFav: newProduct.isFav,
+                        categ: newValue!,
+                      );
+                    },
+                    validator: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          (value != 'Men' &&
+                              value != 'Women' &&
+                              value != 'Electronics' &&
+                              value != 'Shoes' &&
+                              value != 'Beauty')) {
+                        return 'Please Enter a Valid Catgory';
                       }
                       return null;
                     },
@@ -199,6 +239,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         price: double.parse(newValue!),
                         imageUrl: newProduct.imageUrl,
                         isFav: newProduct.isFav,
+                        categ: newProduct.categ,
                       );
                     },
                     validator: (value) {
@@ -230,6 +271,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         price: newProduct.price,
                         imageUrl: newProduct.imageUrl,
                         isFav: newProduct.isFav,
+                        categ: newProduct.categ,
                       );
                     },
                     validator: (value) {
@@ -277,6 +319,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               price: newProduct.price,
                               imageUrl: newValue!,
                               isFav: newProduct.isFav,
+                              categ: newProduct.categ,
                             );
                           },
                           validator: (value) {

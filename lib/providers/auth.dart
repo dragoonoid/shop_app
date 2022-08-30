@@ -16,12 +16,14 @@ class Auth with ChangeNotifier {
     }
     return false;
   }
+  
   String getToken(){
     if(token!='' && expiryDate.isAfter(DateTime.now())){
       return token;
     }
     return 'null';
   }
+  
   Future <bool> tryAutoLogIn() async{
     final prefs=await SharedPreferences.getInstance();
     if(!prefs.containsKey('userData')){
@@ -39,6 +41,7 @@ class Auth with ChangeNotifier {
     autoLogout(); 
     return true;
   }
+  
   Future signInOrsignUp(String email, String password, String mode) async {
     final url = Uri.parse(
         'https://identitytoolkit.googleapis.com/v1/accounts:$mode?key=AIzaSyB6u049MEKPNhLhCG3ZrGeuOjt3mqhcXhU');
@@ -84,6 +87,7 @@ class Auth with ChangeNotifier {
     const mode = 'signInWithPassword';
     return signInOrsignUp(email, password, mode);
   }
+  
   Future logout()async{
     token='';
     userId='';
@@ -96,6 +100,7 @@ class Auth with ChangeNotifier {
     final prefs=await SharedPreferences.getInstance();
     prefs.clear();
   }
+ 
   void autoLogout(){
     if(expiryTimer!=null){
       expiryTimer!.cancel();

@@ -23,17 +23,17 @@ class AuthScreen extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color.fromRGBO(215, 117, 255, 1).withOpacity(0.5),
-                  Color.fromRGBO(255, 188, 117, 1).withOpacity(0.9),
+                  const Color.fromRGBO(215, 117, 255, 1).withOpacity(0.5),
+                  const Color.fromRGBO(255, 188, 117, 1).withOpacity(0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                stops: [0, 1],
+                stops: const [0, 1],
               ),
             ),
           ),
           SingleChildScrollView(
-            child: Container(
+            child: SizedBox(
               height: deviceSize.height,
               width: deviceSize.width,
               child: Column(
@@ -42,9 +42,9 @@ class AuthScreen extends StatelessWidget {
                 children: <Widget>[
                   Flexible(
                     child: Container(
-                      margin: EdgeInsets.only(bottom: 20.0),
+                      margin: const EdgeInsets.only(bottom: 20.0),
                       padding:
-                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
+                          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
                       // transform: Matrix4.rotationZ(-8 * pi / 180)
                       //   ..translate(-10.0),
                       // ..translate(-10.0),
@@ -72,7 +72,7 @@ class AuthScreen extends StatelessWidget {
                   ),
                   Flexible(
                     flex: deviceSize.width > 600 ? 2 : 1,
-                    child: AuthCard(),
+                    child: const AuthCard(),
                   ),
                 ],
               ),
@@ -101,21 +101,19 @@ class _AuthCardState extends State<AuthCard>
   late Animation<Size> _heightAnimation;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
     _heightAnimation = Tween<Size>(
-      begin: Size(double.infinity, 270),
-      end: Size(double.infinity, 500),
+      begin: const Size(double.infinity, 270),
+      end: const Size(double.infinity, 500),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _controller.dispose();
     super.dispose();
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shop/providers/card_item.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/order.dart';
+import 'package:shop/widgit/rating_dialog.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     final cartObj = Provider.of<Cart>(context);
     final sc = ScaffoldMessenger.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
@@ -42,32 +44,42 @@ class _CartPageState extends State<CartPage> {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed:cartObj.totalPrice<=0? null: () async {
-                    await Provider.of<Order>(context, listen: false)
-                        .addOrder(
-                          cartObj.mp.values.toList(),
-                          cartObj.totalPrice,
-                        )
-                        .then((value) { cartObj.clear();
-                        sc.removeCurrentSnackBar();
-                        sc.showSnackBar(
-                          const SnackBar(
-                            content: Text('Order Placed'),
-                          ),
-                        );
-                        })
-                        .catchError(
-                      (error) {
-                        print(error);
-                        sc.removeCurrentSnackBar();
-                        sc.showSnackBar(
-                          const SnackBar(
-                            content: Text('Unable to order'),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                  onPressed: cartObj.totalPrice <= 0
+                      ? null
+                      : () async {
+                          await Provider.of<Order>(context, listen: false)
+                              .addOrder(
+                            cartObj.mp.values.toList(),
+                            cartObj.totalPrice,
+                          )
+                              .then((value) async{
+                            List<CardItem> t = cartObj.mp.values.toList();
+                            showDialog(
+                              context: context,
+                              builder: (_) => RatingDialog(
+                                pos: 0,
+                                mp: t,
+                              ),
+                            );
+                            await cartObj.clear();
+                            sc.removeCurrentSnackBar();
+                            sc.showSnackBar(
+                              const SnackBar(
+                                content: Text('Order Placed'),
+                              ),
+                            );
+                          }).catchError(
+                            (error) {
+                              print(error);
+                              sc.removeCurrentSnackBar();
+                              sc.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Unable to order'),
+                                ),
+                              );
+                            },
+                          );
+                        },
                   child: const Text(
                     'Order Now',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -140,7 +152,21 @@ class EachCardItem extends StatelessWidget {
           },
         );
       },
-      onDismissed: (direction) => cartObj.removeEle(id),
+      onDismissed: (direction) async {
+        // delete all quantty
+        await cartObj.removeEle(id).then(
+          (value) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Item Deleted',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          },
+        );
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         padding: const EdgeInsets.all(3),
@@ -157,19 +183,35 @@ class EachCardItem extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              onPressed: () => cartObj.deleteEle(id),
-              icon: const Icon(Icons.arrow_back_sharp),
+              onPressed: () async {
+                await cartObj.deleteEle(id);
+              }, // reduce quantity
+              icon: const Icon(
+                Icons.minimize,
+                color: Colors.grey,
+              ),
             ),
             Text(
               'Qty: $q',
               style: const TextStyle(fontSize: 16),
             ),
+            IconButton(
+              onPressed: () async {
+                await cartObj.add(id, (eachPrice * q).toString(), title);
+              }, // reduce quantity
+              icon: const Icon(
+                Icons.add,
+                color: Colors.red,
+              ),
+            ),
             const SizedBox(
               width: 20,
             ),
-            Text(
-              '₹$totSum',
-              style: const TextStyle(fontSize: 16),
+            Flexible(
+              child: Text(
+                '₹$totSum',
+                style: const TextStyle(fontSize: 12),
+              ),
             )
           ],
         ),
