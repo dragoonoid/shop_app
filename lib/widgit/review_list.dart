@@ -77,12 +77,17 @@ class _ReviewListState extends State<ReviewList> {
 
     int i = 5;
     List<int> star = provider.totalStars();
+    int totStar=0;
+    for(int i=0;i<5;i++){
+      totStar+=star[i];
+    }
     Widget a = SizedBox(
       height: 200,
       child: Column(
         children: List.generate(5, (index) {
           List<Widget> ans = build5Star(i);
-          ans.add(Text('${star[i - 1]} Review'));
+          String percent=((star[i-1]*100)/totStar).toStringAsFixed(3);
+          ans.add(Text('${star[i - 1]} Review $percent%'));
           i--;
           return Row(
             children: ans,

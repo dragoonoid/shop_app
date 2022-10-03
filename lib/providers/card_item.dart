@@ -17,12 +17,19 @@ class CardItem {
 class Cart with ChangeNotifier {
   late String token;
   late String userId;
+  int currentPage=0;
   void updateToken(String tok, String x) {
     token = tok;
     userId = x;
     notifyListeners();
   }
-
+  updatePage(int x){
+    if(currentPage==x){
+      return;
+    }
+    currentPage=x;
+   // notifyListeners();
+  }
   Map<String, CardItem> mp = {};
   int _num = 0;
   Future addCartIemToFirebase(

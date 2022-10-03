@@ -47,7 +47,7 @@ class _ProductLoadingScreenState extends State<ProductLoadingScreen> {
     final obj = Provider.of<ProviderProd>(context);
     final cart = Provider.of<Cart>(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Shop App'), actions: [
+      appBar: AppBar(backgroundColor:const Color.fromRGBO(143, 148, 251, 1),title: const Text('Shop App'), actions: [
         IconButton(
           icon: const Icon(
             Icons.search,

@@ -100,7 +100,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                       height: 50,
                       width: MediaQuery.of(context).size.width * 0.4,
                       decoration: BoxDecoration(
-                          color: Colors.purple,
+                          color: const Color.fromRGBO(143, 148, 251, 1),
                           borderRadius: BorderRadius.circular(20)),
                       child: const Center(
                           child: Text(
@@ -152,7 +152,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       list.title,
@@ -162,17 +162,15 @@ class _ProductOverviewState extends State<ProductOverview> {
                     const SizedBox(
                       height: 5,
                     ),
-                    Center(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        child: Card(
-                          elevation: 40,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Image.network(
-                            list.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: Card(
+                        elevation: 40,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Image.network(
+                          list.imageUrl,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -207,12 +205,12 @@ class _ProductOverviewState extends State<ProductOverview> {
           ),
           Container(
             constraints:
-                BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
+                BoxConstraints(maxHeight: MediaQuery.of(context).size.height*0.5),
             child: TabBarView(
               children: [
                 Container(
                   constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height),
+                      maxHeight: MediaQuery.of(context).size.height*0.5),
                   child: Text(
                     list.desc,
                     style: const TextStyle(color: Colors.grey, fontSize: 20),
@@ -220,7 +218,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                 ),
                 Container(
                   constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height,
+                    maxHeight: MediaQuery.of(context).size.height*0.5,
                   ),
                   child: const ReviewList(),
                 ),

@@ -11,7 +11,9 @@ class Auth with ChangeNotifier {
   Timer? expiryTimer;
   DateTime expiryDate = DateTime.now();
   bool get isAuth{
+    print('is auth called');
     if(getToken()!='null'){
+      print('is auth true');
       return true;
     }
     return false;

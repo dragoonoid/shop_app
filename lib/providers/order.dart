@@ -21,26 +21,27 @@ class Order with ChangeNotifier {
   List<OrderItem> get orderList {
     return [..._list];
   }
-  String token='';
-  String userId='';
-  void updateToken(String tok, String x){
-    token=tok;
-    userId=x;
+
+  String token = '';
+  String userId = '';
+  void updateToken(String tok, String x) {
+    token = tok;
+    userId = x;
     notifyListeners();
   }
+
   Future getOrderFirebase() async {
-    final response = await http.get(
-        Uri.parse(
-          'https://first-c92f8-default-rtdb.firebaseio.com/order/$userId.json?auth=$token'));
-    if(response==null){
-        return;
+    final response = await http.get(Uri.parse(
+        'https://first-c92f8-default-rtdb.firebaseio.com/order/$userId.json?auth=$token'));
+    if (response == null) {
+      return;
     }
     final x = jsonDecode(response.body) as Map<String, dynamic>;
     List<OrderItem> newList = [];
     x.forEach((id, data) {
       newList.add(OrderItem(
           id: id,
-          amount: data['amount']*1.0,
+          amount: data['amount'] * 1.0,
           product: (data['products'] as List<dynamic>)
               .map((e) => CardItem(
                   id: e['id'],
@@ -53,14 +54,16 @@ class Order with ChangeNotifier {
     _list = newList.reversed.toList();
     notifyListeners();
   }
-  Future addOrder(List<CardItem> l, double amt) async {
+
+  Future addOrder(List<CardItem> l, double amt, String name, String email,
+      String number, String address) async {
     final date = DateTime.now();
     final response = await http
         .post(
       Uri.parse(
           'https://first-c92f8-default-rtdb.firebaseio.com/order/$userId.json?auth=$token'),
       body: jsonEncode({
-        'amount': amt*1.0,
+        'amount': amt * 1.0,
         'date': date.toIso8601String(),
         'products': l
             .map((e) => {
@@ -69,24 +72,17 @@ class Order with ChangeNotifier {
                   'quantity': e.quantity,
                   'title': e.title
                 })
-            .toList()
+            .toList(),
+        'name': name,
+        'email': email,
+        'phoneNo': number,
+        'address': address,
       }),
     )
         .catchError((onError) {
       print(onError);
       throw onError;
     });
-    // _list.insert(
-    //   0,
-    //   OrderItem(
-    //     id: jsonDecode(response.body)['name'],
-    //     amount: amt,
-    //     product: l,
-    //     date: date,
-    //   ),
-    // );
-    //await getOrderFirebase();
     notifyListeners();
   }
-
 }

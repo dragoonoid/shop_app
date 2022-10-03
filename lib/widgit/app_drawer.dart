@@ -13,6 +13,7 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           AppBar(
+            backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
             title:const Text('My Shop'),
             automaticallyImplyLeading: false,
           ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shop/models/stripe_const.dart';
 import 'package:shop/providers/auth.dart';
 import 'package:shop/providers/card_item.dart';
 import 'package:shop/providers/category_prod.dart';
 import 'package:shop/providers/order.dart';
 import 'package:shop/providers/provider_prod.dart';
 import 'package:shop/providers/review_provider.dart';
+import 'package:shop/screens/app_front_page.dart';
 import 'package:shop/screens/auth_screen.dart';
 import 'package:shop/screens/cart.dart';
 import 'package:shop/screens/edit_product_screen.dart';
@@ -13,8 +15,13 @@ import 'package:shop/screens/prev_order.dart';
 import 'package:shop/screens/product_load_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/screens/user_product_screen.dart';
-
+import 'package:flutter_stripe/flutter_stripe.dart';
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Stripe.publishableKey = stripePublishedKey;
+  // Stripe.merchantIdentifier='merchant.flutter.stripe.test';
+  // Stripe.urlScheme='flutterstripe';
+  // await Stripe.instance.applySettings();
   runApp(const MyApp());
 }
 
@@ -60,6 +67,7 @@ class MyApp extends StatelessWidget {
           title: 'Flutter Demo',
           theme: ThemeData(
             primarySwatch: Colors.purple,
+            //primarySwatch: Color.fromRGBO(143, 148, 251, 1),
           ),
           //home: const ProductLoadingScreen(),
           home: objAuth.isAuth
@@ -72,7 +80,7 @@ class MyApp extends StatelessWidget {
                           const Scaffold(
                             body: SpinKitWave(color: Colors.yellow,)
                           )
-                          : const AuthScreen(),
+                          : AuthScreen(),
                 ),
           routes: {
             ProductLoadingScreen.routeName: (context) =>
