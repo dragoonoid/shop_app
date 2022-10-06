@@ -15,7 +15,7 @@ import 'package:shop/screens/prev_order.dart';
 import 'package:shop/screens/product_load_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/screens/user_product_screen.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // Stripe.publishableKey = stripePublishedKey;
