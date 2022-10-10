@@ -56,7 +56,7 @@ class Order with ChangeNotifier {
   }
 
   Future addOrder(List<CardItem> l, double amt, String name, String email,
-      String number, String address) async {
+      String number, String address, String paymentId) async {
     final date = DateTime.now();
     final response = await http
         .post(
@@ -77,6 +77,7 @@ class Order with ChangeNotifier {
         'email': email,
         'phoneNo': number,
         'address': address,
+        'payment_id':paymentId
       }),
     )
         .catchError((onError) {

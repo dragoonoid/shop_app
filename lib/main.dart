@@ -16,12 +16,12 @@ import 'package:shop/screens/product_load_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/screens/user_product_screen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  // Stripe.publishableKey = stripePublishedKey;
-  // Stripe.merchantIdentifier='merchant.flutter.stripe.test';
-  // Stripe.urlScheme='flutterstripe';
-  // await Stripe.instance.applySettings();
+  Stripe.publishableKey = stripePublishedKey;
+  Stripe.merchantIdentifier='merchant.flutter.stripe.test';
+  Stripe.urlScheme='flutterstripe';
+  await Stripe.instance.applySettings();
   runApp(const MyApp());
 }
 

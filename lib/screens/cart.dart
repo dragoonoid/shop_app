@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pay/pay.dart';
 import 'package:shop/providers/card_item.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/order.dart';
@@ -6,7 +7,6 @@ import 'package:shop/providers/payments.dart';
 import 'package:shop/screens/product_load_screen.dart';
 import 'package:shop/widgit/rating_dialog.dart';
 import 'package:flutter/services.dart';
-//import 'package:paytm_allinonesdk/paytm_allinonesdk.dart';
 import 'package:shop/widgit/edit_text.dart';
 import 'package:animated_button/animated_button.dart';
 
@@ -19,17 +19,7 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // payment items------------------------
-  // String mid = "", orderId = "", amount = "", txnToken = "";
-  // String result = "";
-  // bool isStaging = false;
-  // bool isApiCallInprogress = false;
-  // String callbackUrl = "";
-  // bool restrictAppInvoke = false;
-  // bool enableAssist = true;
-
-  //Payments payment=Payments();
-  //-----------------------------------------
+  Payments payment = Payments();
 
   TextEditingController address = TextEditingController();
   TextEditingController phoneNo = TextEditingController();
@@ -39,13 +29,18 @@ class _CartPageState extends State<CartPage> {
   Icon iconProd = const Icon(Icons.arrow_downward);
   Icon iconUser = const Icon(Icons.arrow_upward);
   var x = 0;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
     Provider.of<Cart>(context, listen: false).updatePage(0);
   }
 
+  var _paymentItems = <PaymentItem>[];
   togglePage(BuildContext context, int s) {
+    if (s >= 3) {
+      return;
+    }
     if (s <= x) {
       return;
     }
@@ -57,6 +52,14 @@ class _CartPageState extends State<CartPage> {
       if (!_formKey.currentState!.validate()) {
         return;
       }
+      _paymentItems.add(
+        PaymentItem(
+          label: 'Total',
+          amount:
+              Provider.of<Cart>(context, listen: false).totalPrice.toString(),
+          status: PaymentItemStatus.final_price,
+        ),
+      );
     }
     Provider.of<Cart>(context, listen: false).updatePage(s);
     setState(() {
@@ -64,7 +67,37 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
-  finalSubmit(final cartObj) async {
+  payUsingCard(final cartObj) async {
+    setState(() {
+      isLoading = true;
+    });
+    String amount = (cartObj.totalPrice * 100).toString();
+    Map<String, dynamic> ans = await payment.makePayment(
+      amount,
+      email.text,
+      name.text,
+      phoneNo.text,
+      address.text,
+      null,
+      null,
+      null,
+    );
+    print('false calling');
+    setState(() {
+      isLoading = false;
+    });
+    if (ans['success'] == true) {
+      finalSubmit(cartObj, ans['payment_id']);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to do payment! Please try again'),
+        ),
+      );
+    }
+  }
+
+  finalSubmit(final cartObj, final paymentId) async {
     {
       final sc = ScaffoldMessenger.of(context);
       await Provider.of<Order>(context, listen: false)
@@ -75,6 +108,7 @@ class _CartPageState extends State<CartPage> {
         email.text,
         phoneNo.text,
         address.text,
+        paymentId,
       )
           .then((value) async {
         List<CardItem> t = cartObj.mp.values.toList();
@@ -129,25 +163,64 @@ class _CartPageState extends State<CartPage> {
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: GestureDetector(
         onTap: () {
-          if (x == 3) {
+          if (x == 2 || x == 3) {
             return;
           } else {
             togglePage(context, (x + 1));
           }
         },
-        child: x == 3
-            ? const SizedBox(
-                height: 1,
-                width: 1,
+        child: x == 2
+            ? SizedBox(
+                height: MediaQuery.of(context).size.height * 0.1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    GestureDetector(
+                      onTap: () => payUsingCard(cartObj),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(143, 148, 251, 1),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'VISA Card',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: GooglePayButton(
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        paymentConfigurationAsset: 'gpay.json',
+                        paymentItems: _paymentItems,
+                        type: GooglePayButtonType.pay,
+                        margin: const EdgeInsets.only(top: 15.0),
+                        onPaymentResult: (result) {
+                          finalSubmit(cartObj, 'using gpay');
+                        },
+                        loadingIndicator: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               )
             : Container(
                 margin: const EdgeInsets.all(15),
                 height: 50,
                 width: MediaQuery.of(context).size.width * 0.8,
                 decoration: BoxDecoration(
-                  color: x != 3
-                      ? const Color.fromRGBO(143, 148, 251, 1)
-                      : Colors.grey[100],
+                  color: const Color.fromRGBO(143, 148, 251, 1),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Center(
@@ -172,90 +245,87 @@ class _CartPageState extends State<CartPage> {
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: Column(
-        children: [
-          Card(
-            margin: const EdgeInsets.all(10),
-            child: Row(
+      body: isLoading == true
+          ? CircularProgressIndicator()
+          : Column(
               children: [
-                const Text(
-                  'Total Amount:',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Chip(
-                  label: Text(
-                    '₹${cartObj.totalPrice}',
-                    style: const TextStyle(color: Colors.white),
+                Card(
+                  margin: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Total Amount:',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Chip(
+                        label: Text(
+                          '₹${cartObj.totalPrice}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.teal,
+                      ),
+                      const Spacer(),
+                      // ElevatedButton( // order button
+                      //   // order button app bar
+                      //   onPressed: (cartObj.totalPrice <= 0 || x != 2)
+                      //       ? null
+                      //       : () => finalSubmit(cartObj, ''),
+                      //   child: const Text(
+                      //     'Order Now',
+                      //     style: TextStyle(fontSize: 16, color: Colors.white),
+                      //   ),
+                      // ),
+                    ],
                   ),
-                  backgroundColor: Colors.teal,
                 ),
-                const Spacer(),
-                ElevatedButton(
-                  // order button app bar
-                  onPressed: (cartObj.totalPrice <= 0 || x != 3)
-                      ? null
-                      : () => finalSubmit(cartObj),
-                  child: const Text(
-                    'Order Now',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    GestureDetector(
+                      onTap: () => togglePage(context, 0),
+                      child:
+                          topBarGestureDetector(Icons.verified, 0, 'Product'),
+                    ),
+                    GestureDetector(
+                      onTap: () => togglePage(context, 1),
+                      child:
+                          topBarGestureDetector(Icons.verified, 1, 'Address'),
+                    ),
+                    GestureDetector(
+                      onTap: () => togglePage(context, 2),
+                      child:
+                          topBarGestureDetector(Icons.verified, 2, 'Preview'),
+                    ),
+                  ],
                 ),
+                x == 0
+                    ? Flexible(
+                        child: productWidget(cartObj),
+                      )
+                    : (x == 1
+                        ? addressScreen()
+                        : SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.60,
+                            //child: Container(color: Colors.pink),
+                            child: finalPreviewListForItems(cartObj),
+                          ))
               ],
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              GestureDetector(
-                onTap: () => togglePage(context, 0),
-                child: topBarGestureDetector(Icons.verified, 0, 'Product'),
-              ),
-              GestureDetector(
-                onTap: () => togglePage(context, 1),
-                child: topBarGestureDetector(Icons.verified, 1, 'Address'),
-              ),
-              GestureDetector(
-                onTap: () => togglePage(context, 2),
-                child: topBarGestureDetector(Icons.verified, 2, 'Preview'),
-              ),
-              GestureDetector(
-                onTap: () => togglePage(context, 3),
-                child: topBarGestureDetector(Icons.verified, 3, 'Payment'),
-              ),
-            ],
-          ),
-          x == 0
-              ? Flexible(
-                  child: productWidget(cartObj),
-                )
-              : (x == 1
-                  ? addressScreen()
-                  : (x == 2
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.60,
-                          //child: Container(color: Colors.pink),
-                          child: finalPreviewListForItems(cartObj),
-                        )
-                      : paymentScreen()))
-        ],
-      ),
     );
   }
 
   // TODO payment screen and part-----------------------------
-  Widget paymentScreen() {
-    return Container(
-      child: ElevatedButton(
-        child: const Text('Pay'),
-        onPressed: () async {
-          //await payment.makePayment();
-        },
-      ),
-    );
-  }
+  // Widget paymentScreen(final cartObj) {
+  //   return Container(
+  //     child: ElevatedButton(
+  //       child: const Text('Pay'),
+  //       onPressed: () => payUsingCard(cartObj),
+  //     ),
+  //   );
+  // }
 
 //---------------------------------------------------------------------------
   Widget addressScreen() {
@@ -372,7 +442,9 @@ class _CartPageState extends State<CartPage> {
           ),
         ),
         Flexible(child: productWidget(cartObj)),
-        const SizedBox(child: Divider(),),
+        const SizedBox(
+          child: Divider(),
+        ),
         const Text(
           'Address',
           style: TextStyle(
@@ -388,7 +460,9 @@ class _CartPageState extends State<CartPage> {
         ),
         const SizedBox(
           height: 20,
-          child: Divider(thickness: 0.8,),
+          child: Divider(
+            thickness: 0.8,
+          ),
         ),
         Text(
           'Final Amount: ₹${cartObj.totalPrice}',
